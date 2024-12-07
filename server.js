@@ -3,8 +3,16 @@ import axios from "axios";
 import dotenv from "dotenv";
 import cors from "cors";
 import moment from "moment";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path"; // Make sure to import 'join' from 'path'
 
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+dotenv.config({
+  path: join(__dirname, `.env.${process.env.NODE_ENV || "development"}`),
+});
+
 const app = express();
 const PORT = process.env.PORT;
 const weather_URL = "https://api.openweathermap.org/data/2.5/";
@@ -13,13 +21,7 @@ const API_KEY = process.env.API_KEY;
 app.use(express.json());
 app.use(
   cors({
-    origin: (origin, callback) => {
-      if (!origin || /.*\.vercel\.app$/.test(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"), false);
-      }
-    },
+    origin: process.env.ORIGIN,
     methods: "GET,POST",
     credentials: true,
   })
@@ -44,7 +46,6 @@ async function fetchWeatherData(latitude, longitude) {
     );
     currentWeather.visibility = currentWeather.visibility / 1000;
     currentWeather.dt = moment().format("dddd, hh:mm A");
-    // currentWeather.dt = moment(currentWeather.dt * 1000).format("dddd, hh:mm A");
 
     const forecast_result = await axios.get(
       `${weather_URL}forecast?units=metric&lat=${latitude}&lon=${longitude}&appid=${API_KEY}`
