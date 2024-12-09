@@ -45,22 +45,22 @@ async function fetchWeatherData(latitude, longitude) {
       currentWeather.weather[0].description
     );
     currentWeather.visibility = currentWeather.visibility / 1000;
-    currentWeather.dt = moment().format("dddd, hh:mm A");
+    currentWeather.dt = moment()
+      .utcOffset(currentWeather.timezone / 60)
+      .format("dddd, hh:mm A");
 
     const forecast_result = await axios.get(
       `${weather_URL}forecast?units=metric&lat=${latitude}&lon=${longitude}&appid=${API_KEY}`
     );
     const forecastWeather = forecast_result.data;
 
-    for (let index = 0; index < 6; index++) {
-      forecastWeather.list[index].dt = moment(
-        forecastWeather.list[index].dt * 1000
-      ).format("hh:mm A");
-
-      forecastWeather.list[index].weather[0].description = capFirstLetters(
-        forecastWeather.list[index].weather[0].description
+    forecastWeather.list = forecastWeather.list.map((item) => {
+      item.dt = moment(item.dt * 1000).format("hh:mm A");
+      item.weather[0].description = capFirstLetters(
+        item.weather[0].description
       );
-    }
+      return item;
+    });
 
     return { currentWeather, forecastWeather };
   } catch (error) {
