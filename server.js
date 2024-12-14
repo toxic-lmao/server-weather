@@ -36,7 +36,7 @@ app.post("/weather", async (req, res) => {
 });
 
 app.get("*", (req, res) => {
-  res.send("Documentation");
+  res.sendStatus(404);
 });
 
 app.listen(process.env.PORT, () => {
