@@ -1,16 +1,10 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-import { fileURLToPath } from "url";
-import { dirname, join } from "path";
-import fetchWeather from "./libs/fetchWeather.js";
+import { fetchWeather } from "./libs/fetchWeather.js";
+import { searchLocation } from "./libs/searchLocation.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-dotenv.config({
-  path: join(__dirname, `.env.${process.env.NODE_ENV}`),
-});
+dotenv.config();
 
 const app = express();
 
@@ -24,15 +18,18 @@ app.use(
 );
 
 app.post("/weather", async (req, res) => {
-  try {
-    const { latitude, longitude } = req.body;
+  const { latitude, longitude } = req.body;
 
-    const weatherData = await fetchWeather(latitude, longitude);
+  const weatherData = await fetchWeather(latitude, longitude);
 
-    res.json(weatherData);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to fetch weather data" });
-  }
+  res.json(weatherData);
+});
+
+app.get("/search", async (req, res) => {
+  const { query } = req.query;
+  const locations = await searchLocation(query);
+
+  res.json(locations);
 });
 
 app.get("*", (req, res) => {

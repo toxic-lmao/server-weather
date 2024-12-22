@@ -1,6 +1,6 @@
-export default function capFirstLetters(str) {
+export const capFirstLetters = (str) => {
   return str
     .split(" ")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
-}
+};

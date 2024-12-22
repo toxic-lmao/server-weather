@@ -1,16 +1,15 @@
-import axios from "axios";
 import moment from "moment";
-import capFirstLetter from "./capFirstLetter.js";
+import { capFirstLetters } from "./capFirstLetter.js";
 
-export default async function fetchWeatherData(latitude, longitude) {
+export const fetchWeather = async (latitude, longitude) => {
   try {
     console.log("fetched");
-    const curr_result = await axios.get(
+    const curr_result = await fetch(
       `${process.env.API_URL}weather?units=metric&lat=${latitude}&lon=${longitude}&appid=${process.env.API_KEY}`
     );
-    const currentWeather = curr_result.data;
+    const currentWeather = await curr_result.json();
 
-    currentWeather.weather[0].description = capFirstLetter(
+    currentWeather.weather[0].description = capFirstLetters(
       currentWeather.weather[0].description
     );
     currentWeather.visibility = currentWeather.visibility / 1000;
@@ -18,10 +17,10 @@ export default async function fetchWeatherData(latitude, longitude) {
       .utcOffset(currentWeather.timezone / 60)
       .format("dddd, hh:mm A");
 
-    const forecast_result = await axios.get(
+    const forecast_result = await fetch(
       `${process.env.API_URL}forecast?units=metric&lat=${latitude}&lon=${longitude}&appid=${process.env.API_KEY}`
     );
-    const forecastWeather = forecast_result.data;
+    const forecastWeather = await forecast_result.json();
 
     forecastWeather.list = forecastWeather.list.map((item) => {
       return {
@@ -31,14 +30,13 @@ export default async function fetchWeatherData(latitude, longitude) {
         ),
         weather: item.weather.map((weather) => ({
           ...weather,
-          description: capFirstLetter(weather.description),
+          description: capFirstLetters(weather.description),
         })),
       };
     });
 
     return { currentWeather, forecastWeather };
   } catch (error) {
-    console.log(error);
     return error;
   }
-}
+};
